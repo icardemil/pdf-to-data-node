@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-// app.use('/api/ocr');
+app.use('/api/ocr', require('./routes/ocr'));
 
 app.listen(app.get('port'), () => {
 	console.log('Listen on port ', app.get('port'));
