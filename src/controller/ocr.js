@@ -50,6 +50,13 @@ const uploadPDF = async (req, res) => {
 				},
 			);
 		}
+		console.log('File converted');
+		fs.unlink(path, err => {
+			if (err) {
+				console.log('Error deleteing file');
+			}
+			console.log('Delete file successfully');
+		});
 		return res.json({
 			ok: true,
 			filenameNormalized,
