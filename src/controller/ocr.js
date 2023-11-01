@@ -1,26 +1,11 @@
 const { convert } = require('pdf-img-convert');
-const multer = require('multer');
 const fs = require('fs');
+const { getFilenameNormalized } = require('../helpers');
 
-const storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		cb(null, 'temp/pdf');
-	},
-	filename: function (req, file, cb) {
-		cb(null, `${Date.now()}-${file.originalname}}`);
-	},
-});
-
-const upload = multer({ storage });
-
-const uploadPDF = async (req, res) => {
+const handlePdf = async (req, res) => {
 	try {
 		const { path, filename } = req.file;
-		const filenameNoSpaces = filename.replace(/\s/g, '');
-		const filenameNormalized = filenameNoSpaces.substring(
-			0,
-			filenameNoSpaces.length - 4,
-		);
+		const filenameNormalized = getFilenameNormalized(filename);
 		const outputImages = await convert(path, {
 			width: 780,
 			height: 1027,
@@ -53,7 +38,7 @@ const uploadPDF = async (req, res) => {
 		console.log('File converted');
 		fs.unlink(path, err => {
 			if (err) {
-				console.log('Error deleteing file');
+				console.log('Error deleting file');
 			}
 			console.log('Delete file successfully');
 		});
@@ -71,6 +56,5 @@ const uploadPDF = async (req, res) => {
 };
 
 module.exports = {
-	upload,
-	uploadPDF,
+	handlePdf,
 };

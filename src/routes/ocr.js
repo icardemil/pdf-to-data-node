@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { upload, uploadPDF } = require('../controller/ocr');
+const { uploadFile } = require('../services/uploadFile');
+const { handlePdf } = require('../controller/ocr');
 
-router.post('/convert-pdf', upload.single('newFile'), uploadPDF);
+router.post('/convert-pdf', uploadFile.single('newFile'), handlePdf);
 
 module.exports = router;
