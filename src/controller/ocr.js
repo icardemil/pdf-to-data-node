@@ -14,25 +14,37 @@ const handlePdf = async (req, res) => {
 		const filenameNormalized = getFilenameNormalized(filename);
 		const outputImages = await convert(path, CONFIG_PAGE);
 		const imageFolder = `./temp/images/${filenameNormalized}`;
-		const { msg: folderMsg, ok: folderOk, error: folderError } = createFolder(imageFolder);
-		if (!folderOk) {
+
+		const folderResponse = createFolder(imageFolder);
+		if (!folderResponse.ok) {
+			console(folderResponse.error);
 			return res.status(400).json({
-				ok: folderOk,
-				msg: folderMsg,
-				error: folderError,
+				ok: folderResponse.ok,
+				msg: folderResponse.msg,
 			});
 		}
-		console.log(folderMsg);
-		const { msg: fileMsg, ok: fileOk, error: fileError } = createFiles(imageFolder, filenameNormalized, outputImages.length, outputImages);
-		if (!fileOk) {
+		console.log(folderResponse.msg);
+
+		const filesResponse = createFiles(imageFolder, filenameNormalized, outputImages.length, outputImages);
+		if (!filesResponse.ok) {
+			console.log(filesResponse.error);
 			return res.status(400).json({
-				ok: fileOk,
-				msg: fileMsg,
-				error: fileError,
+				ok: filesResponse.ok,
+				msg: filesResponse.msg,
 			});
 		}
-		console.log(fileMsg);
-		deleteFile(path);
+		console.log(filesResponse.msg);
+
+		const deleteResponse = deleteFile(path, 'pdf');
+		if (!deleteResponse.ok) {
+			console.log(deleteResponse.error);
+			return res.status(400).json({
+				ok: deleteResponse.ok,
+				msg: deleteResponse.msg,
+			});
+		}
+		console.log(deleteResponse.msg);
+
 		return res.json({
 			ok: true,
 			filenameNormalized,
