@@ -3,3 +3,5 @@ node_modules
 api_request
 temp/pdf/*
 temp/images/*
+src/uploads/pdf/*
+src/uploads/images/*
