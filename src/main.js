@@ -1,9 +1,11 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
+global.appRoot = path.resolve(__dirname);
 
 app.set('port', process.env.SERVER_PORT || 5000);
 app.use(morgan('dev'));
