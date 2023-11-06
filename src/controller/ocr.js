@@ -1,8 +1,7 @@
-const path = require('path');
-const fs = require('fs');
 const { convert } = require('pdf-img-convert');
 const { getFilenameNormalized } = require('../helpers');
 const { deleteFile, createFolder, createFiles } = require('../services/File');
+const { getFiles } = require('../services/Directory');
 
 const CONFIG_PAGE = {
 	width: 780,
@@ -64,25 +63,21 @@ const handlePdf = async (req, res) => {
 };
 
 const getImagesDirectory = (req, res) => {
-	const fullPath = path.join(global.appRoot, 'uploads/images');
-	try {
-		const files = fs.readdirSync(fullPath);
-		for (const file of files) {
-			const date = file.split('-')[0];
-			const createdAt = new Date(date * 1);
-			console.log(createdAt.toLocaleString());
-		}
-		return res.json({
-			ok: true,
-			files,
-		});
-	} catch (error) {
-		console.log(error);
+	const directoryResponse = getFiles('uploads/images');
+
+	if (!directoryResponse.ok) {
+		console.log(directoryResponse.error);
 		return res.status(400).json({
-			ok: false,
+			ok: directoryResponse.ok,
 			msg: 'Something went wrong',
+			step: 'getDirectory',
 		});
 	}
+
+	return res.json({
+		ok: directoryResponse.ok,
+		data: directoryResponse.files,
+	});
 };
 
 module.exports = {
