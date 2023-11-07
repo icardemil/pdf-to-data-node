@@ -1,4 +1,7 @@
 const { convert } = require('pdf-img-convert');
+const { createWorker } = require('tesseract.js');
+const path = require('path');
+
 const { getFilenameNormalized } = require('../helpers');
 const { deleteFile, createFolder, createFiles } = require('../services/File');
 const { getFiles } = require('../services/Directory');
@@ -80,7 +83,43 @@ const getImagesDirectory = (req, res) => {
 	});
 };
 
+const getData = async (req, res) => {
+	try {
+		const worker = await createWorker('spa');
+		const ret = await worker.recognize(path.join(global.appRoot, 'path de archivo en la carpeta images'));
+		console.log(ret.data.text);
+		await worker.terminate();
+		return res.json({
+			ok: true,
+		});
+	} catch (error) {
+		return res.status(400).json({
+			ok: false,
+			error,
+		});
+	}
+	// try {
+	// 	const worker = await getWorker();
+
+	// 	(await worker).load();
+	// 	const {
+	// 		data: { text },
+	// 	} = (await worker).recognize(
+	// 		path.join(
+	// 			global.appRoot,
+	// 			'uploads/images/1698972438411-2Â°TraspadoProcesoNormalJulio2023b/1698972438411-2Â°TraspadoProcesoNormalJulio2023b-output0.png',
+	// 		),
+	// 	);
+	// 	console.log(text);
+	// 	return res.json({
+	// 		ok: true,
+	// 		msg: 'Data',
+	// 	});
+	// } catch (error) {}
+};
+
 module.exports = {
 	handlePdf,
 	getImagesDirectory,
+	getData,
 };
