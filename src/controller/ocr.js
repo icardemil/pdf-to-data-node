@@ -9,14 +9,13 @@ const { getFiles } = require('../services/Directory');
 const CONFIG_PAGE = {
 	width: 780,
 	height: 1027,
-	page_numbers: [1, 2],
+	page_numbers: [1, 2, 3],
 };
 
 const handlePdf = async (req, res) => {
 	try {
 		const { path, filename } = req.file;
 		const filenameNormalized = getFilenameNormalized(filename);
-		const outputImages = await convert(path, CONFIG_PAGE);
 		const imageFolder = `./src/uploads/images/${filenameNormalized}`;
 
 		const folderResponse = createFolder(imageFolder);
@@ -30,6 +29,7 @@ const handlePdf = async (req, res) => {
 		}
 		console.log(folderResponse.msg);
 
+		const outputImages = await convert(path, CONFIG_PAGE);
 		const filesResponse = createFiles(imageFolder, filenameNormalized, outputImages.length, outputImages);
 		if (!filesResponse.ok) {
 			console.log(filesResponse.error);
@@ -66,7 +66,7 @@ const handlePdf = async (req, res) => {
 };
 
 const getImagesDirectory = (req, res) => {
-	const directoryResponse = getFiles('uploads/images');
+	const directoryResponse = getFiles('uploads/images/');
 
 	if (!directoryResponse.ok) {
 		console.log(directoryResponse.error);
@@ -79,15 +79,21 @@ const getImagesDirectory = (req, res) => {
 
 	return res.json({
 		ok: directoryResponse.ok,
-		data: directoryResponse.files,
+		data: directoryResponse.data,
 	});
 };
 
 const getData = async (req, res) => {
+	const { id } = req.params;
+	const imagesPath = `uploads/images/${id}`;
+	const { data: files } = getFiles(imagesPath);
+	console.log(files);
 	try {
 		const worker = await createWorker('spa');
-		const ret = await worker.recognize(path.join(global.appRoot, 'path de archivo en la carpeta images'));
-		console.log(ret.data.text);
+		for (const file of files) {
+			const ret = await worker.recognize(path.join(global.appRoot, imagesPath, file.id));
+			console.log(ret.data.text);
+		}
 		await worker.terminate();
 		return res.json({
 			ok: true,
@@ -98,24 +104,6 @@ const getData = async (req, res) => {
 			error,
 		});
 	}
-	// try {
-	// 	const worker = await getWorker();
-
-	// 	(await worker).load();
-	// 	const {
-	// 		data: { text },
-	// 	} = (await worker).recognize(
-	// 		path.join(
-	// 			global.appRoot,
-	// 			'uploads/images/1698972438411-2Â°TraspadoProcesoNormalJulio2023b/1698972438411-2Â°TraspadoProcesoNormalJulio2023b-output0.png',
-	// 		),
-	// 	);
-	// 	console.log(text);
-	// 	return res.json({
-	// 		ok: true,
-	// 		msg: 'Data',
-	// 	});
-	// } catch (error) {}
 };
 
 module.exports = {

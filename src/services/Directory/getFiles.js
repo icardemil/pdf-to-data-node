@@ -12,6 +12,7 @@ const getFiles = directoryPath => {
 			const [date, filename] = file.split('-');
 			const formatDate = getFormatDate(date);
 			const fileInfo = {
+				id: file,
 				name: filename,
 				createdAt: date,
 				formatDate,
@@ -20,7 +21,7 @@ const getFiles = directoryPath => {
 		}
 		return {
 			ok: true,
-			files: directoryFiles,
+			data: directoryFiles,
 		};
 	} catch (error) {
 		console.log(error);
