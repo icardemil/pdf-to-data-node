@@ -1,10 +1,11 @@
 const { convert } = require('pdf-img-convert');
-const { createWorker } = require('tesseract.js');
-const path = require('path');
+// const { createWorker } = require('tesseract.js');
+// const path = require('path');
 
 const { getFilenameNormalized } = require('../helpers');
 const { deleteFile, createFolder, createFiles } = require('../services/File');
 const { getFiles } = require('../services/Directory');
+const { extractText } = require('../services/Ocr');
 
 const CONFIG_PAGE = {
 	width: 780,
@@ -85,25 +86,21 @@ const getImagesDirectory = (req, res) => {
 
 const getData = async (req, res) => {
 	const { id } = req.params;
-	const imagesPath = `uploads/images/${id}`;
-	const { data: files } = getFiles(imagesPath);
-	console.log(files);
-	try {
-		const worker = await createWorker('spa');
-		for (const file of files) {
-			const ret = await worker.recognize(path.join(global.appRoot, imagesPath, file.id));
-			console.log(ret.data.text);
-		}
-		await worker.terminate();
-		return res.json({
-			ok: true,
-		});
-	} catch (error) {
+	const extractResponse = await extractText(id);
+
+	if (!extractResponse.ok) {
+		console.log(extractResponse.error);
 		return res.status(400).json({
-			ok: false,
-			error,
+			ok: extractResponse.ok,
+			msg: 'Something went wrong',
+			step: 'extractText',
 		});
 	}
+
+	return res.json({
+		ok: extractResponse.ok,
+		data: extractResponse.data,
+	});
 };
 
 module.exports = {
