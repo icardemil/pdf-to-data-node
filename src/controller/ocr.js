@@ -1,19 +1,12 @@
 const { convert } = require('pdf-img-convert');
-// const { createWorker } = require('tesseract.js');
-// const path = require('path');
 
-const { getFilenameNormalized } = require('../helpers');
+const { getFilenameNormalized, getPageDimension } = require('../helpers');
 const { deleteFile, createFolder, createFiles } = require('../services/File');
 const { getFiles } = require('../services/Directory');
 const { extractText } = require('../services/Ocr');
 
-const CONFIG_PAGE = {
-	width: 780,
-	height: 1027,
-	page_numbers: [1, 2, 3],
-};
-
 const handlePdf = async (req, res) => {
+	const page = req.body;
 	try {
 		const { path, filename } = req.file;
 		const filenameNormalized = getFilenameNormalized(filename);
@@ -30,7 +23,8 @@ const handlePdf = async (req, res) => {
 		}
 		console.log(folderResponse.msg);
 
-		const outputImages = await convert(path, CONFIG_PAGE);
+		const pageConfig = getPageDimension(page);
+		const outputImages = await convert(path, pageConfig);
 		const filesResponse = createFiles(imageFolder, filenameNormalized, outputImages.length, outputImages);
 		if (!filesResponse.ok) {
 			console.log(filesResponse.error);
