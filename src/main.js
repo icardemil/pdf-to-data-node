@@ -28,3 +28,7 @@ app.use('/api/ocr', require('./routes/ocr'));
 app.listen(app.get('port'), () => {
 	console.log('Listen on port ', app.get('port'));
 });
+
+module.exports = {
+	app,
+};
