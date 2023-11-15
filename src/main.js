@@ -25,10 +25,11 @@ app.use((req, res, next) => {
 
 app.use('/api/ocr', require('./routes/ocr'));
 
-app.listen(app.get('port'), () => {
+const server = app.listen(app.get('port'), () => {
 	console.log('Listen on port ', app.get('port'));
 });
 
 module.exports = {
 	app,
+	server,
 };
